@@ -1,6 +1,6 @@
 const express = require('express');
-const fs = require('fs/promises');
-const path = require('path');
+const { fileServices } = require('./services');
+
 
 const app = express();
 
@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
 app.get('/users', async (req, res) => {
     console.log('USERS ENDPOINT');
 
-    const users = await reader();
+    const users = await fileServices.reader();
 
     res.json(users);
 });
@@ -30,7 +30,7 @@ app.post('/users', async (req, res) => {
         return res.status(400).json('Wrong age');
     }
 
-    const users = await reader();
+    const users = await fileServices.reader();
 
     const newUser = {
         name: userInfo.name,
@@ -39,7 +39,7 @@ app.post('/users', async (req, res) => {
     };
     users.push(newUser);
 
-    await writer(users);
+    await fileServices.writer(users);
 
     res.status(201).json(newUser);
 });
@@ -47,7 +47,7 @@ app.post('/users', async (req, res) => {
 app.get('/users/:userId', async (req, res) => {
     const { userId } = req.params;
 
-    const users = await reader();
+    const users = await fileServices.reader();
 
     const user = users.find((u) => u.id === +userId);
 
@@ -61,7 +61,7 @@ app.put('/users/:userId', async (req, res) => {
     const newUserInfo = req.body;
     const { userId } = req.params;
 
-    const users = await reader();
+    const users = await fileServices.reader();
 
     const index = users.findIndex((u) => u.id === +userId);
 
@@ -71,7 +71,7 @@ app.put('/users/:userId', async (req, res) => {
 
     users[index] = { ...users[index], ...newUserInfo };
 
-    await writer(users);
+    await fileServices.writer(users);
 
     res.status(201).json(users[index]);
 });
@@ -79,7 +79,7 @@ app.put('/users/:userId', async (req, res) => {
 app.delete('/users/:userId', async (req, res) => {
     const { userId } = req.params;
 
-    const users = await reader();
+    const users = await fileServices.reader();
 
     const index = users.findIndex((u) => u.id === +userId);
 
@@ -89,7 +89,7 @@ app.delete('/users/:userId', async (req, res) => {
 
     users.splice(index, 1);
 
-    await writer(users);
+    await fileServices.writer(users);
 
     res.sendStatus(204);
 });
@@ -99,10 +99,3 @@ app.listen(5000, () => {
     console.log('Server listen 5000');
 });
 
-const reader = async () => {
-    const buffer = await fs.readFile(path.join(__dirname, 'dataBase', 'users.json'));
-    return JSON.parse(buffer.toString());
-};
-const writer = async (users) => {
-    await fs.writeFile(path.join(__dirname, 'dataBase', 'users.json'), JSON.stringify(users));
-};
