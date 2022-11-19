@@ -21,21 +21,21 @@ app.get('/users', async (req, res) => {
 
 
 app.post('/users', async (req, res) => {
-    const userInfo = req.body;
+    const { name, age } = req.body;
 
-    if (userInfo.name.length < 3 || typeof userInfo.name !== 'string') {
+    if (!name || name.length < 3) {
         return res.status(400).json('Wrong name');
     }
-    if (userInfo.age < 0 || Number.isNaN(+userInfo.age)) {
+    if (!age || age < 18 || Number.isNaN(age)) {
         return res.status(400).json('Wrong age');
     }
 
     const users = await fileServices.reader();
 
     const newUser = {
-        name: userInfo.name,
-        age: userInfo.age,
         id: users[users.length - 1].id + 1,
+        name,
+        age,
     };
     users.push(newUser);
 
@@ -49,7 +49,7 @@ app.get('/users/:userId', async (req, res) => {
 
     const users = await fileServices.reader();
 
-    const user = users.find((u) => u.id === +userId);
+    const user = users.find((user) => user.id === +userId);
 
     if (!user) {
         return res.status(404).json(`User with id ${userId} not found`);
@@ -63,7 +63,7 @@ app.put('/users/:userId', async (req, res) => {
 
     const users = await fileServices.reader();
 
-    const index = users.findIndex((u) => u.id === +userId);
+    const index = users.findIndex((user) => user.id === +userId);
 
     if (index === -1) {
         return res.status(404).json(`User with id ${userId} not found`);
@@ -81,7 +81,7 @@ app.delete('/users/:userId', async (req, res) => {
 
     const users = await fileServices.reader();
 
-    const index = users.findIndex((u) => u.id === +userId);
+    const index = users.findIndex((user) => user.id === +userId);
 
     if (index === -1) {
         return res.status(404).json(`User with id ${userId} not found`);
