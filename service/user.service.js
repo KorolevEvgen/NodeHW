@@ -8,16 +8,32 @@ module.exports = {
     findOneByParams: async (filter = {}) => {
         return User.findOne(filter);
     },
+    findByIdWithCars: async (userId) => {
+        const res = await User.aggregate([
+            {
+                $match: { _id: userId },
+            },
+            {
+                $lookup: {
+                    from: 'cars',
+                    localField: '_id',
+                    foreignField: 'user',
+                    as: 'cars',
+                },
+            },
+        ]);
+        return res[0];
+    },
     create: async (userInfo) => {
-        return User.create(userInfo)
+        return User.create(userInfo);
 
     },
     updateOne: async (userId, newInfo) => {
-        return User.findByIdAndUpdate(userId, newInfo,{new:true})
+        return User.findByIdAndUpdate(userId, newInfo, { new: true });
 
-},
+    },
     deleteOne: async (userId) => {
-        return userService.deleteOne({ _id: userId })
+        return userService.deleteOne({ _id: userId });
 
     },
 };
