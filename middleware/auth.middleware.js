@@ -1,10 +1,11 @@
-const authValidator = require('../validator/auth.validator');
 const OAuth = require('../dataBase/OAuth');
-const ApiError = require('../error/ApiError');
-const oauthService = require('../service/oauth.service');
+const authValidator = require('../validator/auth.validator');
+const oauthService = require("../service/oauth.service");
+
+const ApiError = require("../error/ApiError");
 const { tokenTypeEnum } = require('../enum');
-const emailService = require('../service/email.service');
-const { FORGOT_PASS } = require('../config/email-action.enum');
+const emailService = require("../service/email.service");
+const { FORGOT_PASS } = require("../config/email-action.enum");
 
 module.exports = {
     isBodyValid: async (req, res, next) => {
@@ -20,15 +21,17 @@ module.exports = {
             next(e);
         }
     },
+
     checkAccessToken: async (req, res, next) => {
         try {
-            await emailService.sendEmail('filling55555@gmail.com',FORGOT_PASS)
+            await emailService.sendEmail('filling55555@gmail.com', FORGOT_PASS);
 
             const accessToken = req.get('Authorization');
 
             if (!accessToken) {
                 throw new ApiError('No token', 401);
             }
+
             oauthService.checkToken(accessToken);
 
             const tokenInfo = await OAuth.findOne({ accessToken });
@@ -37,12 +40,13 @@ module.exports = {
                 throw new ApiError('Token not valid', 401);
             }
 
-
+            req.tokenInfo = tokenInfo;
             next();
         } catch (e) {
             next(e);
         }
     },
+
     checkRefreshToken: async (req, res, next) => {
         try {
             const refreshToken = req.get('Authorization');
@@ -50,6 +54,7 @@ module.exports = {
             if (!refreshToken) {
                 throw new ApiError('No token', 401);
             }
+
             oauthService.checkToken(refreshToken, tokenTypeEnum.refreshToken);
 
             const tokenInfo = await OAuth.findOne({ refreshToken });
@@ -59,11 +64,9 @@ module.exports = {
             }
 
             req.tokenInfo = tokenInfo;
-
             next();
         } catch (e) {
             next(e);
         }
-    },
-
-};
+    }
+}
