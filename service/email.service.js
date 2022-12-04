@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer'); // підключаємо nodemailer
+const nodemailer = require('nodemailer')
 const EmailTemplates = require('email-templates');
 const path = require('path');
 const { NO_REPLY_EMAIL, NO_REPLY_EMAIL_PASSWORD } = require('../config/config');
